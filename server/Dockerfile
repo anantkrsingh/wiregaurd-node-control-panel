@@ -15,6 +15,6 @@ RUN npm run build
 
 RUN mkdir -p /app/data
 
-EXPOSE 3000
+EXPOSE 4001
 
 CMD ["node", "dist/index.js"]
