@@ -1,7 +1,7 @@
-import { DatabaseSync } from "node:sqlite";
+import Database from "better-sqlite3";
 import path from "path";
 const dbPath = path.join(process.cwd(), "data", "database.db");
-const fileDb = new DatabaseSync(dbPath);
+const fileDb = new Database(dbPath);
 (global as any).db = fileDb;
 
 

@@ -31,8 +31,8 @@ app.use("/api/public", publicRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   // startPeerSnapshotInterval(30_000);
-  setTimeout(() => {
-    import("./jobs/peer-snapshot").then((m) => m.runPeerSnapshotJob().catch((e) => console.error("Initial peer snapshot:", e)));
-  }, 2000);
+  // setTimeout(() => {
+  //   import("./jobs/peer-snapshot").then((m) => m.runPeerSnapshotJob().catch((e) => console.error("Initial peer snapshot:", e)));
+  // }, 2000);
 });
 
