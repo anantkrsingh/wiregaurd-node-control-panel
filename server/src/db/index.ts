@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "path";
-const dbPath = path.join(__dirname, "../../data/database.db");
+const dbPath = path.join(process.cwd(), "data", "database.db");
 const fileDb = new DatabaseSync(dbPath);
 (global as any).db = fileDb;
 
