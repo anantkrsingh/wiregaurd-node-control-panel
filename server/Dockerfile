@@ -2,7 +2,12 @@ FROM node:20-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y python3 make g++ \
+# install required tools
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
