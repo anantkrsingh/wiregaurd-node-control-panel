@@ -4,7 +4,8 @@ FROM node:20-alpine
 # Create app directory
 WORKDIR /app
 
-RUN apk update && apk add --no-cache python3 build-base
+RUN apt-get update && apt-get install -y python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # Install dependencies first (better caching)
