@@ -8,11 +8,23 @@ import { randomBytes } from "node:crypto";
 
 const SSH_USER = "wg-user";
 
+import { getClientConfigStmt, insertClientConfigStmt, type ClientConfigRow } from "../db/query/client_configs";
+
 /** Shared: create peer on server and return config. Used by auth and public endpoints. */
 export function doCreatePeerAndGetConfig(
   row: ServerRow,
   clientName: string
 ): { config_content: string; client_name: string; client_ip: string | null } {
+  // Check if config already exists
+  const existingConfig = getClientConfigStmt().get(row.id, clientName) as ClientConfigRow | undefined;
+  if (existingConfig) {
+    return {
+      config_content: existingConfig.config_content,
+      client_name: existingConfig.client_name,
+      client_ip: existingConfig.client_ip,
+    };
+  }
+
   const script = getAddWgClientScript({ serverPublicIp: row.ip });
   const scriptBase64 = Buffer.from(script, "utf8").toString("base64");
   const tmpId = randomBytes(4).toString("hex");
@@ -47,8 +59,13 @@ export function doCreatePeerAndGetConfig(
     throw new Error("Config was created but could not read it.");
   }
 
+  const configContent = catRun.stdout.trim();
+
+  // Save the new config
+  insertClientConfigStmt().run(row.id, clientName, clientIp, configContent);
+
   return {
-    config_content: catRun.stdout.trim(),
+    config_content: configContent,
     client_name: clientName,
     client_ip: clientIp,
   };

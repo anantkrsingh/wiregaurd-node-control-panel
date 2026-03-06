@@ -6,7 +6,7 @@ const fileDb = new Database(dbPath);
 
 
 fileDb.exec(
-    `
+  `
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -18,7 +18,7 @@ fileDb.exec(
 )
 
 fileDb.exec(
-    `
+  `
     CREATE TABLE IF NOT EXISTS countries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -29,7 +29,7 @@ fileDb.exec(
 );
 
 fileDb.exec(
-    `
+  `
     CREATE TABLE IF NOT EXISTS servers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ip TEXT NOT NULL UNIQUE,
@@ -89,5 +89,20 @@ try {
 } catch {
   // ignore
 }
+
+fileDb.exec(
+  `
+  CREATE TABLE IF NOT EXISTS client_configs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    server_id INTEGER NOT NULL,
+    client_name TEXT NOT NULL,
+    client_ip TEXT,
+    config_content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(server_id, client_name),
+    FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
+  )
+  `
+);
 
 export { fileDb };
