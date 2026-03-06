@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { Country } from "@/types/country"
-import { createCountry, listCountries } from "@/utils/countries"
-import { X } from "lucide-react"
+import { createCountry, listCountries, updateCountry } from "@/utils/countries"
+import { X, Pencil } from "lucide-react"
 
 function Countries() {
   const [countries, setCountries] = useState<Country[]>([])
@@ -14,6 +14,8 @@ function Countries() {
   const [flagUrl, setFlagUrl] = useState("")
   const [loading, setLoading] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingCountry, setEditingCountry] = useState<Country | null>(null)
 
   async function refresh() {
     try {
@@ -51,6 +53,41 @@ function Countries() {
     }
   }
 
+  async function onEdit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (loading || !editingCountry) return
+    const nameTrim = name.trim()
+    if (!nameTrim) {
+      toast.error("Country name is required")
+      return
+    }
+    setLoading(true)
+    try {
+      await updateCountry(editingCountry.id, nameTrim, flagUrl.trim() || undefined)
+      toast.success("Country updated")
+      setEditOpen(false)
+      setEditingCountry(null)
+      await refresh()
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update country")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function openEdit(country: Country) {
+    setEditingCountry(country)
+    setName(country.name)
+    setFlagUrl(country.flag_url || "")
+    setEditOpen(true)
+  }
+
+  function openAdd() {
+    setName("")
+    setFlagUrl("")
+    setAddOpen(true)
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -60,7 +97,7 @@ function Countries() {
             Manage countries for server locations. Add a country name and optional flag URL, then select it when adding a server.
           </div>
         </div>
-        <Button type="button" onClick={() => setAddOpen(true)}>
+        <Button type="button" onClick={openAdd}>
           Add country
         </Button>
       </div>
@@ -127,6 +164,82 @@ function Countries() {
         </div>
       )}
 
+      {editOpen && editingCountry && (
+        <div
+          className="fixed inset-0 z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit country"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setEditOpen(false)
+              setEditingCountry(null)
+            }
+          }}
+        >
+          <div className="fixed inset-0 bg-black/50" onClick={() => {
+            setEditOpen(false)
+            setEditingCountry(null)
+          }} />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Card className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <CardHeader className="pr-12">
+                <CardTitle>Edit country</CardTitle>
+                <CardDescription>
+                  Update the country name or flag image URL.
+                </CardDescription>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-3 top-3"
+                  aria-label="Close"
+                  onClick={() => {
+                    setEditOpen(false)
+                    setEditingCountry(null)
+                  }}
+                >
+                  <X className="size-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4" onSubmit={onEdit}>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-country-name">Country name</Label>
+                    <Input
+                      id="edit-country-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. India, United States"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-flag-url">Flag URL (optional)</Label>
+                    <Input
+                      id="edit-flag-url"
+                      value={flagUrl}
+                      onChange={(e) => setFlagUrl(e.target.value)}
+                      placeholder="https://example.com/flag.png"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Saving..." : "Save changes"}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => {
+                      setEditOpen(false)
+                      setEditingCountry(null)
+                    }}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>All countries</CardTitle>
@@ -147,7 +260,15 @@ function Countries() {
                   ) : (
                     <div className="h-6 w-8 rounded bg-muted" aria-hidden />
                   )}
-                  <span className="font-medium">{c.name}</span>
+                  <span className="font-medium flex-1">{c.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => openEdit(c)}
+                    aria-label={`Edit ${c.name}`}
+                  >
+                    <Pencil className="size-4" />
+                  </Button>
                 </div>
               ))}
             </div>

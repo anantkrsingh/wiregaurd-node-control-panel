@@ -28,3 +28,18 @@ export async function createCountry(name: string, flagUrl?: string) {
     throw new Error("Network Error");
   }
 }
+
+export async function updateCountry(id: number, name: string, flagUrl?: string) {
+  try {
+    const response = await api.put<{
+      message: string;
+      country: Country;
+    }>(`/countries/${id}`, { name, flag_url: flagUrl ?? "" });
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data?.message || "No Response from server");
+    }
+    throw new Error("Network Error");
+  }
+}

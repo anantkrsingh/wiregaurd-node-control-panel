@@ -20,3 +20,7 @@ export const insertCountryStmt = () => {
 export const getCountryByIdStmt = () => {
   return fileDb.prepare("SELECT * FROM countries WHERE id = ?");
 };
+
+export const updateCountryStmt = () => {
+  return fileDb.prepare("UPDATE countries SET name = ?, flag_url = ? WHERE id = ?");
+};

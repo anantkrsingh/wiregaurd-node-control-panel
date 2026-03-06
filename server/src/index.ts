@@ -12,7 +12,7 @@ import publicRoutes from "./routes/public";
 import { startPeerSnapshotInterval } from "./jobs/peer-snapshot";
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "https://vpn-admin.netlify.app"],
   credentials: true,
 }));
 
